@@ -12,7 +12,7 @@ const App: React.FC = () => {
   const [getApyData, { data: apyData, loading: apyLoading, error: apyError }] = useLazyQuery(GET_APY_FOR_VAULT);
   const [selectedAsset, setSelectedAsset] = useState<string | null>(null);
 
-  const handleVaultClick = (vault: { address: string,  name: string, chainId: number }) => {
+  const handleVaultClick = (vault: { address: string, name: string, chainId: number }) => {
     setSelectedAsset(vault.name);
     getApyData({
       variables: {
@@ -51,15 +51,21 @@ const App: React.FC = () => {
 
   return (
     <div className="flex">
-        <Sidebar groupedVaults={groupedVaults} handleVaultClick={handleVaultClick} />
-      <div className="flex-1 p-5">
+      <Sidebar groupedVaults={groupedVaults} handleVaultClick={handleVaultClick} />
+      <div className="flex-1 p-5 flex flex-col items-center justify-center h-screen"> {/* Center content and fill screen */}
         {apyLoading && <p>Loading APR data...</p>}
         {apyError && <p>Error: {apyError.message}</p>}
+        {!apyData && (
+          <div>
+            <h2>Choose a Vault on the Left to see APY Data</h2>
+          </div>
+        )}
         {apyData && (
           <>
             <h1>{selectedAsset ? `${selectedAsset} Chart` : 'Name not found'}</h1>
-            <ApyChart data={apyData.timeseries} />
-            {/* <pre>{JSON.stringify(apyData, null, 2)}</pre> */}
+            <div className="mt-8"> {/* Added margin-top to move the chart downward */}
+              <ApyChart data={apyData.timeseries} />
+            </div>
           </>
         )}
       </div>
