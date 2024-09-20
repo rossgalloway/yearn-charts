@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './App.css'
-import TestChart from './components/TestChart'
+import ApyChart from './components/ApyChart';
 import { GET_VAULTS, GET_APY_FOR_VAULT, filterVaults } from './graphql/queries'
 import { useQuery, useLazyQuery } from '@apollo/client';
 import Sidebar from './components/Sidebar';
@@ -58,8 +58,8 @@ const App: React.FC = () => {
         {apyData && (
           <>
             <h1>{selectedAsset ? `${selectedAsset} Chart` : 'Name not found'}</h1>
-            <TestChart data={apyData.timeseries} />
-            <pre>{JSON.stringify(apyData, null, 2)}</pre>
+            <ApyChart data={apyData.timeseries} />
+            {/* <pre>{JSON.stringify(apyData, null, 2)}</pre> */}
           </>
         )}
       </div>
