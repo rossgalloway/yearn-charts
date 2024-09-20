@@ -1,11 +1,12 @@
 {
   "name": "yearn-charts",
+  "private": "true",
   "version": "0.1.0",
   "homepage": "https://rossgalloway.github.io/yearn-charts", 
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
     "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
     "format": "prettier --write 'src/**/*.{js,jsx,ts,tsx,json,css,md}'",
     "preview": "vite preview"
