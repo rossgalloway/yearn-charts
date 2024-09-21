@@ -1,138 +1,232 @@
 import React, { useState } from 'react';
-import { CHAIN_ID_TO_NAME } from '../constants/chains';
+import { CHAIN_ID_TO_NAME, ChainId } from '../constants/chains';
 import { getApiVersion } from '../helpers/getApiVersion';
 
-// Define the Vault interface to represent the structure of a vault object
 interface Vault {
-    address: string; // The address of the vault
-    name: string; // The name of the vault
-    asset: { name: string }; // The asset associated with the vault
-    chainId: number; // The chain ID where the vault is located
-    apiVersion: string; // The API version of the vault
-    tvl: { close: number }; // The total value locked (TVL) in the vault
+  address: string;
+  name: string;
+  asset: { name: string };
+  chainId: ChainId;
+  apiVersion: string;
+  tvl: { close: number };
 }
 
-// Define the SidebarProps interface to represent the props passed to the Sidebar component
 interface SidebarProps {
-    groupedVaults: { [key: string]: Vault[] }; // An object where keys are asset names and values are arrays of Vaults
-    handleVaultClick: (vault: Vault) => void; // A function to handle vault click events
+  groupedVaults: { [key: string]: Vault[] };
+  handleVaultClick: (vault: Vault) => void;
 }
 
-// Define the Sidebar functional component
+interface OpenGroupsState {
+  [assetName: string]: {
+    isOpen: boolean;
+    chains: {
+      [chainName: string]: {
+        isOpen: boolean;
+        versions: {
+          [version: string]: boolean;
+        };
+      };
+    };
+  };
+}
+
+// Reusable ToggleButton component
+interface ToggleButtonProps {
+  isOpen: boolean;
+  onClick: () => void;
+  label: string;
+  className?: string;
+}
+
+const ToggleButton: React.FC<ToggleButtonProps> = ({ isOpen, onClick, label, className }) => (
+  <button
+    className={`p-2.5 w-full text-left cursor-pointer hover:bg-blue-700 flex justify-between ${className}`}
+    onClick={onClick}
+  >
+    <span>{label}</span>
+    <span>{isOpen ? '−' : '+'}</span>
+  </button>
+);
+
 const Sidebar: React.FC<SidebarProps> = ({ groupedVaults, handleVaultClick }) => {
-    // State to manage which groups are open or closed
-    const [openGroups, setOpenGroups] = useState<{ [key: string]: boolean }>({});
-    // State to manage the currently active vault
-    const [activeVault, setActiveVault] = useState<string | null>(null);
-    // State to manage the search term input by the user
-    const [searchTerm, setSearchTerm] = useState<string>(''); // Added search term state
+  const [openGroups, setOpenGroups] = useState<OpenGroupsState>({});
+  const [activeVault, setActiveVault] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
-    // Function to toggle the open/closed state of a group
-    const toggleGroup = (assetName: string) => {
-      setOpenGroups(prevState => ({
-        ...prevState,
-        [assetName]: !prevState[assetName],
-      }));
-    };
+  // Function to toggle asset group
+  const toggleAssetGroup = (assetName: string) => {
+    setOpenGroups(prevState => ({
+      ...prevState,
+      [assetName]: {
+        ...prevState[assetName],
+        isOpen: !prevState[assetName]?.isOpen,
+      },
+    }));
+  };
 
-    // Function to handle vault click events and set the active vault
-    const handleVaultClickWithActive = (vault: Vault) => {
-      setActiveVault(vault.address);
-      handleVaultClick(vault);
-    };
+  // Function to toggle chain group
+  const toggleChainGroup = (assetName: string, chainName: string) => {
+    setOpenGroups(prevState => ({
+      ...prevState,
+      [assetName]: {
+        ...prevState[assetName],
+        chains: {
+          ...prevState[assetName]?.chains,
+          [chainName]: {
+            ...prevState[assetName]?.chains?.[chainName],
+            isOpen: !prevState[assetName]?.chains?.[chainName]?.isOpen,
+          },
+        },
+      },
+    }));
+  };
 
-    // Function to format a number as currency
-    const formatCurrency = (value: number) => {
-      return `$${value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`; // Format currency
-    };
+  // Function to toggle version group
+  const toggleVersionGroup = (assetName: string, chainName: string, version: string) => {
+    setOpenGroups(prevState => ({
+      ...prevState,
+      [assetName]: {
+        ...prevState[assetName],
+        chains: {
+          ...prevState[assetName]?.chains,
+          [chainName]: {
+            ...prevState[assetName]?.chains?.[chainName],
+            versions: {
+              ...prevState[assetName]?.chains?.[chainName]?.versions,
+              [version]: !prevState[assetName]?.chains?.[chainName]?.versions?.[version],
+            },
+          },
+        },
+      },
+    }));
+  };
 
-    // Filter the grouped vaults based on the search term
-    const filteredGroupedVaults = Object.keys(groupedVaults).reduce((acc: Record<string, Vault[]>, assetName) => {
-      const filteredVaults = groupedVaults[assetName].filter(vault => 
-        vault.name.toLowerCase().includes(searchTerm.toLowerCase()) || // Updated filter condition
-        vault.address.toLowerCase().includes(searchTerm.toLowerCase()) // Updated filter condition
-      );
-      if (filteredVaults.length > 0) {
-        acc[assetName] = filteredVaults;
-      }
-      return acc;
-    }, {});
-  
-    return (
-      <div className="h-screen overflow-y-auto p-2.5" style={{ width: '34rem' }}> {/* Changed width to 30rem */}
-        <input 
-          type="text" 
-          placeholder="Search vaults..." 
-          value={searchTerm} 
-          onChange={(e) => setSearchTerm(e.target.value)} 
-          className="w-full p-2.5 mb-4 border border-gray-300 rounded" 
-        /> {/* Added search bar */}
-        {Object.keys(filteredGroupedVaults).map(assetName => (
-          <div key={assetName} className="asset-group">
-            <button 
-            className={`p-2.5 border-none bg-none w-full text-left cursor-pointer hover:bg-blue-700 bg-darkBackground flex justify-between ${filteredGroupedVaults[assetName].some(vault => vault.address === activeVault) ? 'bg-blue-700' : ''}`} 
-            onClick={() => toggleGroup(assetName)}> 
-            <span className="flex-grow">{assetName}</span>
-            <span className="ml-2">{openGroups[assetName] ? '−' : '+'}</span> 
-            </button>
-            {openGroups[assetName] && (
-              <div className="vault-versions pl-4"> {/* Indentation for hierarchy */}
-                {Object.keys(filteredGroupedVaults[assetName].reduce((acc: Record<string, Vault[]>, vault) => {
-                  const chainName = CHAIN_ID_TO_NAME[vault.chainId as keyof typeof CHAIN_ID_TO_NAME];
-                  if (!acc[chainName]) acc[chainName] = [];
-                  acc[chainName].push(vault);
-                  return acc;
-                }, {})).map(chainName => (
-                  <div key={chainName} className="chain-group">
-                    <button 
-                    className="chain-name font-bold p-2.5 border-none bg-none w-full text-left cursor-pointer hover:bg-blue-700 bg-darkBackground flex justify-between"
-                    onClick={() => toggleGroup(chainName)}>
-                      <span className="flex-grow">{chainName}</span>
-                      <span className="ml-2">{openGroups[chainName] ? '−' : '+'}</span>
-                    </button>
-                    {openGroups[chainName] && (
-                      <div className="pl-4"> {/* Further indentation for sub-items */}
-                        {Object.keys(filteredGroupedVaults[assetName].filter(vault => CHAIN_ID_TO_NAME[vault.chainId as keyof typeof CHAIN_ID_TO_NAME] === chainName).reduce((acc: Record<string, Vault[]>, vault) => {
-                          const version = getApiVersion(vault.apiVersion);
-                          if (version === 'unknown') throw new Error(`Unknown API version for vault ${vault.address}`);
-                          if (!acc[version]) acc[version] = [];
-                          acc[version].push(vault);
-                          return acc;
-                        }, {})).sort(a => a === 'v3' ? -1 : 1).map(version => ( // Changed line to sort versions
-                          <div key={version} className="version-group">
-                            <button 
-                            className="version-name font-semibold p-2.5 border-none bg-none w-full text-left cursor-pointer hover:bg-blue-700 bg-darkBackground flex justify-between"
-                            onClick={() => toggleGroup(version)}>
-                              <span className="flex-grow">{version}</span>
-                              <span className="ml-2">{openGroups[version] ? '−' : '+'}</span>
-                            </button>
-                            {openGroups[version] && (
-                              <div className="pl-4"> {/* Further indentation for sub-items */}
-                                {filteredGroupedVaults[assetName].filter(vault => CHAIN_ID_TO_NAME[vault.chainId as keyof typeof CHAIN_ID_TO_NAME] === chainName && getApiVersion(vault.apiVersion) === version).map(vault => (
-                                  <button 
-                                  key={vault.address} 
-                                  className={`p-2.5 border-none bg-none w-full text-left cursor-pointer hover:bg-blue-700 ${activeVault === vault.address ? 'bg-blue-700' : ' bg-darkBackground'}`}
-                                  onClick={() => handleVaultClickWithActive(vault)}
-                                  > 
-                                    <div>{`${vault.name}`}</div>
-                                    <div>{`${CHAIN_ID_TO_NAME[vault.chainId as keyof typeof CHAIN_ID_TO_NAME]} - API Version ${vault.apiVersion}`}</div>
-                                    <div>{`TVL: ${formatCurrency(vault.tvl.close)}`}</div> {/* Added formatted TVL display */}
-                                    <div>{`${vault.address}`}</div> {/* Added address display */}
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
+  // Handle vault click and set active vault
+  const handleVaultClickWithActive = (vault: Vault) => {
+    setActiveVault(vault.address);
+    handleVaultClick(vault);
+  };
+
+  // Format currency
+  const formatCurrency = (value: number) => {
+    return `$${value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`;
+  };
+
+  // Filter and group vaults based on search term
+  const filteredGroupedVaults = Object.keys(groupedVaults).reduce((acc: Record<string, Vault[]>, assetName) => {
+    const filteredVaults = groupedVaults[assetName].filter(
+      vault =>
+        vault.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        vault.address.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
+    if (filteredVaults.length > 0) {
+      acc[assetName] = filteredVaults;
+    }
+    return acc;
+  }, {});
+
+  return (
+    <div className="h-screen overflow-y-auto p-2.5" style={{ width: '34rem' }}>
+      <input
+        type="text"
+        placeholder="Search vaults..."
+        value={searchTerm}
+        onChange={e => setSearchTerm(e.target.value)}
+        className="w-full p-2.5 mb-4 border border-gray-300 rounded"
+      />
+      {Object.keys(filteredGroupedVaults).map(assetName => {
+        const isAssetOpen = openGroups[assetName]?.isOpen || false;
+        return (
+          <div key={assetName}>
+            <ToggleButton
+              isOpen={isAssetOpen}
+              onClick={() => toggleAssetGroup(assetName)}
+              label={assetName}
+              className={`bg-darkBackground ${isAssetOpen ? 'bg-blue-700' : ''}`}
+            />
+            {isAssetOpen && (
+              <div className="pl-4">
+                {/* Group vaults by chain */}
+                {Object.keys(
+                  filteredGroupedVaults[assetName].reduce((acc: Record<string, Vault[]>, vault) => {
+                    const chainName = CHAIN_ID_TO_NAME[vault.chainId];
+                    if (!acc[chainName]) acc[chainName] = [];
+                    acc[chainName].push(vault);
+                    return acc;
+                  }, {}),
+                ).map(chainName => {
+                  const isChainOpen = openGroups[assetName]?.chains?.[chainName]?.isOpen || false;
+                  return (
+                    <div key={chainName}>
+                      <ToggleButton
+                        isOpen={isChainOpen}
+                        onClick={() => toggleChainGroup(assetName, chainName)}
+                        label={chainName}
+                        className="bg-darkBackground font-bold"
+                      />
+                      {isChainOpen && (
+                        <div className="pl-4">
+                          {/* Group vaults by version */}
+                          {Object.keys(
+                            filteredGroupedVaults[assetName]
+                              .filter(vault => CHAIN_ID_TO_NAME[vault.chainId] === chainName)
+                              .reduce((acc: Record<string, Vault[]>, vault) => {
+                                const version = getApiVersion(vault.apiVersion);
+                                if (!acc[version]) acc[version] = [];
+                                acc[version].push(vault);
+                                return acc;
+                              }, {}),
+                          )
+                            .sort(version => (version === 'v3' ? -1 : 1))
+                            .map(version => {
+                              const isVersionOpen =
+                                openGroups[assetName]?.chains?.[chainName]?.versions?.[version] || false;
+                              return (
+                                <div key={version}>
+                                  <ToggleButton
+                                    isOpen={isVersionOpen}
+                                    onClick={() => toggleVersionGroup(assetName, chainName, version)}
+                                    label={version}
+                                    className="bg-darkBackground font-semibold"
+                                  />
+                                  {isVersionOpen && (
+                                    <div className="pl-4">
+                                      {filteredGroupedVaults[assetName]
+                                        .filter(
+                                          vault =>
+                                            CHAIN_ID_TO_NAME[vault.chainId] === chainName &&
+                                            getApiVersion(vault.apiVersion) === version,
+                                        )
+                                        .map(vault => (
+                                          <button
+                                            key={vault.address}
+                                            className={`p-2.5 w-full text-left cursor-pointer hover:bg-blue-700 ${
+                                              activeVault === vault.address ? 'bg-blue-700' : 'bg-darkBackground'
+                                            }`}
+                                            onClick={() => handleVaultClickWithActive(vault)}
+                                          >
+                                            <div>{vault.name}</div>
+                                            <div>{`TVL: ${formatCurrency(vault.tvl.close)}`}</div>
+                                            <div>{vault.address}</div>
+                                          </button>
+                                        ))}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
-        ))}
-      </div>
-    );
-}
+        );
+      })}
+    </div>
+  );
+};
+
 export default Sidebar;
