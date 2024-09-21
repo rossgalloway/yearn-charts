@@ -1,9 +1,10 @@
 import { gql } from '@apollo/client';
+import { ChainId } from '../constants/chains';
 
 export type Vault = {
   yearn: boolean;
   name: string;
-  chainId: number
+  chainId: ChainId
   address: string;
   asset: {
     name: string;

@@ -1,26 +1,27 @@
-import globals from "globals";
-import pluginJs from "@eslint/js";
-import tseslint from "typescript-eslint";
-import pluginReact from "eslint-plugin-react";
+import { Linter } from 'eslint';
+import typescriptParser from '@typescript-eslint/parser';
+import typescriptPlugin from '@typescript-eslint/eslint-plugin';
+import reactPlugin from 'eslint-plugin-react';
 
+const config = {
+  parser: typescriptParser,
+  parserOptions: {
+    project: ['./tsconfig.json'],
+  },
+  plugins: ['react', '@typescript-eslint'],
+  extends: [
+    'eslint:recommended',
+    'plugin:react/recommended',
+    'plugin:@typescript-eslint/recommended',
+  ],
+  settings: {
+    react: {
+      version: 'detect',
+    },
+  },
+  rules: {
+    // Your custom rules
+  },
+};
 
-export default [
-  {files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"]},
-  {
-    languageOptions: 
-    { 
-      globals: globals.browser 
-    }
-  },
-  pluginJs.configs.recommended,
-  ...tseslint.configs.recommended,
-  pluginReact.configs.flat.recommended,
-  {
-    ...pluginReact.configs.flat.recommended,
-    settings: {
-      react: {
-        version: "detect"
-      }
-    }
-  },
-];
+export default config;
