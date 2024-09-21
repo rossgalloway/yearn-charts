@@ -2,14 +2,15 @@
   "name": "yearn-charts",
   "private": "true",
   "version": "0.1.0",
-  "homepage": "https://rossgalloway.github.io/yearn-charts", 
+  "homepage": "https://rossgalloway.github.io/yearn-charts",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
     "format": "prettier --write 'src/**/*.{js,jsx,ts,tsx,json,css,md}'",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "stitch": "node scripts/stitch.js"
   },
   "dependencies": {
     "@apollo/client": "^3.11.8",
@@ -17,7 +18,8 @@
     "graphql": "^16.9.0",
     "react": "^18.3.1",
     "react-chartjs-2": "^5.2.0",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "tiktoken": "^1.0.16"
   },
   "devDependencies": {
     "@eslint/js": "^9.10.0",
