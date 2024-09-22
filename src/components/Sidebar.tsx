@@ -126,14 +126,16 @@ const Sidebar: React.FC<SidebarProps> = ({ groupedVaults, handleVaultClick }) =>
   }, {});
 
   return (
-    <div className="h-screen overflow-y-auto p-2.5" style={{ width: '34rem' }}>
-      <input
-        type="text"
-        placeholder="Search vaults..."
-        value={searchTerm}
-        onChange={e => setSearchTerm(e.target.value)}
-        className="w-full p-2.5 mb-4 border border-gray-300 rounded"
-      />
+    <div className="overflow-y-auto" style={{ width: '34rem', height: 'calc(100vh - 64px)' }}> {/* Adjusted height */}
+      <div className="sticky top-0 bg-darkBackground z-10 p-2.5"> {/* Added padding to sticky div */}
+        <input
+          type="text"
+          placeholder="Search vaults..."
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+          className="w-full p-2.5 border border-gray-300 rounded"
+        />
+      </div>
       {Object.keys(filteredGroupedVaults).map(assetName => {
         const isAssetOpen = openGroups[assetName]?.isOpen || false;
         return (
@@ -200,9 +202,8 @@ const Sidebar: React.FC<SidebarProps> = ({ groupedVaults, handleVaultClick }) =>
                                         .map(vault => (
                                           <button
                                             key={vault.address}
-                                            className={`p-2.5 w-full text-left cursor-pointer hover:bg-blue-700 ${
-                                              activeVault === vault.address ? 'bg-blue-700' : 'bg-darkBackground'
-                                            }`}
+                                            className={`p-2.5 w-full text-left cursor-pointer hover:bg-blue-700 ${activeVault === vault.address ? 'bg-blue-700' : 'bg-darkBackground'
+                                              }`}
                                             onClick={() => handleVaultClickWithActive(vault)}
                                           >
                                             <div>{vault.name}</div>
@@ -227,6 +228,6 @@ const Sidebar: React.FC<SidebarProps> = ({ groupedVaults, handleVaultClick }) =>
       })}
     </div>
   );
-};
+}
 
 export default Sidebar;

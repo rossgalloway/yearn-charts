@@ -33,6 +33,7 @@ const options = {
         display: true, // Displays the title for y-axis
         text: 'Value (%)', // Title text for y-axis
       },
+      min: 0, // Annotated: Set minimum value to 0
     },
   },
   plugins: {
@@ -124,6 +125,7 @@ const ApyChart: React.FC<ApyChartProps> = ({ data }) => {
           borderColor: 'rgba(255,159,64,1)',
           pointRadius: 0,
           data: Array(values.length).fill(averageValue),
+          
         },
       ],
     }),
