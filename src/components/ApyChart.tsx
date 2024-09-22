@@ -1,7 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react'; // Annotated: Added useMemo
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
+
+interface DataEntry {
+  time: number;
+  value: number;
+}
+
+interface ApyChartProps {
+  data: DataEntry[];
+}
 
 // Register all necessary components for Chart.js
 Chart.register(...registerables);
@@ -58,54 +67,68 @@ const calculateAverage = (data: any[]) => {
   return sum / data.length; // Return the average
 };
 
-// ApyChart component definition
-const ApyChart: React.FC<{ data: any[] }> = ({ data }) => {
-  // State to hold chart data
-  const [chartData, setChartData] = useState<{ labels: string[]; datasets: { label: string; backgroundColor: string; borderColor: string; data: (number | null)[]; pointRadius?: number }[] }>({ labels: [], datasets: [] });
-  // State to hold the selected timeframe
-  const [timeframe, setTimeframe] = useState<number>(30);
+const ApyChart: React.FC<ApyChartProps> = ({ data }) => {
+  const [timeframe, setTimeframe] = useState<number | 'max'>(30);
 
-  // Effect to update chart data when `data` or `timeframe` changes
-  useEffect(() => {
-    const timeframeInDays = typeof timeframe === 'string' && timeframe === 'max' ? data.length : timeframe; // Determine the timeframe in days
-    const filteredData = data.slice(-timeframeInDays).map(entry => ({
-      ...entry,
-      time: new Date(entry.time * 1000).toLocaleDateString(), // Convert timestamp to date string
-      value: entry.value * 100, // Convert value to percentage
-    }));
+  // Determine the timeframe in days
+  const timeframeInDays = useMemo(() => {
+    return timeframe === 'max' ? data.length : timeframe;
+  }, [timeframe, data.length]);
 
-    const values = filteredData.map(entry => entry.value); // Extract values from filtered data
-    const allValues = data.map(entry => entry.value * 100); // Extract all values for SMA calculation
-    const smaValues = calculateSMA(allValues, 15).slice(-timeframeInDays); // Calculate 15-day SMA and slice to match timeframe
-    const averageValue = calculateAverage(values); // Calculate average value
+  // Memoize the filtered data based on the timeframe
+  const filteredData = useMemo(() => {
+    return data
+      .slice(-timeframeInDays)
+      .map(entry => ({
+        ...entry,
+        time: new Date(entry.time * 1000).toLocaleDateString(),
+        value: entry.value * 100,
+      }));
+  }, [data, timeframeInDays]);
 
-    // Set the chart data
-    setChartData({
-      labels: filteredData.map(entry => entry.time), // Set labels to the time values
+  // Memoize the values extracted from filtered data
+  const values = useMemo(() => filteredData.map(entry => entry.value), [filteredData]);
+
+  // Memoize all values for SMA calculation
+  const allValues = useMemo(() => data.map(entry => entry.value * 100), [data]);
+
+  // Memoize the SMA values
+  const smaValues = useMemo(() => {
+    return calculateSMA(allValues, 15).slice(-timeframeInDays);
+  }, [allValues, timeframeInDays]);
+
+  // Memoize the average value
+  const averageValue = useMemo(() => calculateAverage(values), [values]);
+
+  // Memoize the chart data
+  const chartData = useMemo(
+    () => ({
+      labels: filteredData.map(entry => entry.time),
       datasets: [
         {
-          label: 'Value (%)', // Label for the dataset
-          backgroundColor: 'rgba(75,192,192,0.4)', // Background color for the dataset
-          borderColor: 'rgba(75,192,192,1)', // Border color for the dataset
-          data: filteredData.map(entry => entry.value), // Data points for the dataset
+          label: 'Value (%)',
+          backgroundColor: 'rgba(75,192,192,0.4)',
+          borderColor: 'rgba(75,192,192,1)',
+          data: values,
         },
         {
-          label: '15-Day SMA (%)', // Label for the SMA dataset
-          backgroundColor: 'rgba(153,102,255,0.4)', // Background color for the SMA dataset
-          borderColor: 'rgba(153,102,255,1)', // Border color for the SMA dataset
-          data: smaValues, // Data points for the SMA dataset
-          pointRadius: 0, // Radius of the points in the SMA dataset
+          label: '15-Day SMA (%)',
+          backgroundColor: 'rgba(153,102,255,0.4)',
+          borderColor: 'rgba(153,102,255,1)',
+          data: smaValues,
+          pointRadius: 0,
         },
         {
-          label: 'Average APR (%)', // Label for the average dataset
-          backgroundColor: 'rgba(255,159,64,0.4)', // Background color for the average dataset
-          borderColor: 'rgba(255,159,64,1)', // Border color for the average dataset
-          pointRadius: 0, // Radius of the points in the average dataset
-          data: Array(values.length).fill(averageValue), // Data points for the average dataset
+          label: 'Average APR (%)',
+          backgroundColor: 'rgba(255,159,64,0.4)',
+          borderColor: 'rgba(255,159,64,1)',
+          pointRadius: 0,
+          data: Array(values.length).fill(averageValue),
         },
       ],
-    });
-  }, [data, timeframe]); // Dependency array for the effect
+    }),
+    [filteredData, values, smaValues, averageValue],
+  );
 
   return (
     <div className="h-[600px] w-[1200px] flex flex-col justify-center items-center">
@@ -134,7 +157,7 @@ const ApyChart: React.FC<{ data: any[] }> = ({ data }) => {
         </button>
         {/* Button to set timeframe to the maximum available data */}
         <button
-          onClick={() => setTimeframe(data.length)}
+          onClick={() => setTimeframe('max')}
           className={`p-2 rounded ${timeframe === data.length ? 'bg-blue-500 text-white' : 'border border-blue-500 text-blue-500 bg-darkBackground hover:bg-blue-500 hover:text-white'}`}
         >
           Max

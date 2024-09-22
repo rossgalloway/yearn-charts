@@ -7,9 +7,9 @@ export default {
   theme: {
     extend: {
       colors: {
-      darkBackground: '#242424',
+        darkBackground: '#242424',
+      },
     },
-  },
   },
   plugins: [],
 }
