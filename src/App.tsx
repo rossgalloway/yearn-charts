@@ -92,7 +92,7 @@ return (
         <div className="flex-1 p-5 pt-0 flex flex-col items-center justify-center w-full">
           {apyLoading && <LoadingSpinner />}
           {apyError && <ErrorMessage error={apyError} />}
-          {!apyData && (
+          {!apyLoading && !apyError && !apyData && (
             <div>
               <h2>Choose a Vault on the Left to see APY Data</h2>
             </div>
