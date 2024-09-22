@@ -133,34 +133,34 @@ const ApyChart: React.FC<ApyChartProps> = ({ data }) => {
   );
 
   return (
-    <div className="h-[600px] w-[1200px] flex flex-col justify-center items-center">
+    <div className="h-[600px] flex flex-col justify-center items-center" style={{ width: `calc(100vw - 24rem)`}}> {/* Fixed calc syntax */}
       <Line data={chartData} options={options} /> {/* Render the Line chart */}
       <div className="mt-4">
         {/* Button to set timeframe to 7 days */}
         <button
           onClick={() => setTimeframe(7)}
-          className={`mr-2 p-2 rounded ${timeframe === 7 ? 'bg-blue-500 text-white' : 'border border-blue-500 text-blue-500 bg-darkBackground hover:bg-blue-500 hover:text-white'}`}
+          className={`mr-2 p-2 rounded ${timeframe === 7 ? 'bg-blue-500 text-white' : 'border border-blue-500 text-blue-500 bg-lightBackground dark:bg-darkBackground hover:bg-blue-500 hover:text-white'}`} // Annotated: Updated for light and dark mode
         >
           7 Days
         </button>
         {/* Button to set timeframe to 30 days */}
         <button
           onClick={() => setTimeframe(30)}
-          className={`mr-2 p-2 rounded ${timeframe === 30 ? 'bg-blue-500 text-white' : 'border border-blue-500 text-blue-500 bg-darkBackground hover:bg-blue-500 hover:text-white'}`}
+          className={`mr-2 p-2 rounded ${timeframe === 30 ? 'bg-blue-500 text-white' : 'border border-blue-500 text-blue-500 bg-lightBackground dark:bg-darkBackground hover:bg-blue-500 hover:text-white'}`} // Annotated: Updated for light and dark mode
         >
           30 Days
         </button>
         {/* Button to set timeframe to 180 days */}
         <button
           onClick={() => setTimeframe(180)}
-          className={`mr-2 p-2 rounded ${timeframe === 180 ? 'bg-blue-500 text-white' : 'border border-blue-500 text-blue-500 bg-darkBackground hover:bg-blue-500 hover:text-white'}`}
+          className={`mr-2 p-2 rounded ${timeframe === 180 ? 'bg-blue-500 text-white' : 'border border-blue-500 text-blue-500 bg-lightBackground dark:bg-darkBackground hover:bg-blue-500 hover:text-white'}`} // Annotated: Updated for light and dark mode
         >
           180 Days
         </button>
         {/* Button to set timeframe to the maximum available data */}
         <button
           onClick={() => setTimeframe('max')}
-          className={`p-2 rounded ${timeframe === data.length ? 'bg-blue-500 text-white' : 'border border-blue-500 text-blue-500 bg-darkBackground hover:bg-blue-500 hover:text-white'}`}
+          className={`p-2 rounded ${timeframe === data.length ? 'bg-blue-500 text-white' : 'border border-blue-500 text-blue-500 bg-lightBackground dark:bg-darkBackground hover:bg-blue-500 hover:text-white'}`} // Annotated: Updated for light and dark mode
         >
           Max
         </button>

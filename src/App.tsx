@@ -81,35 +81,36 @@ const App: React.FC = () => {
     groupedVaults[assetName].sort((a, b) => a.chainId - b.chainId);
   });
 
-  return (
-    <div className="flex flex-col h-screen w-screen pl-4 pr-4" >
-      <NavBar/>
-      <div className="flex flex-1">
-        <Suspense fallback={<div>Loading...</div>}>
+return (
+  <div className="flex flex-col h-screen w-screen pl-4 pr-4">
+    <NavBar />
+    <div className="flex flex-1 flex-col md:flex-row">
+      <Suspense fallback={<div>Loading...</div>}>
+        <div className="w-full md:w-1/4" style={{ minWidth: '20rem', width: '20rem'}}>
           <Sidebar groupedVaults={groupedVaults} handleVaultClick={handleVaultClick} />
-          <div className="flex-1 p-5 flex flex-col items-center justify-center">
-            {apyLoading && <LoadingSpinner />}
-            {apyError && <ErrorMessage error={apyError} />}
-            {!apyData && (
-              <div>
-                <h2>Choose a Vault on the Left to see APY Data</h2>
+        </div>
+        <div className="flex-1 p-5 pt-0 flex flex-col items-center justify-center w-full">
+          {apyLoading && <LoadingSpinner />}
+          {apyError && <ErrorMessage error={apyError} />}
+          {!apyData && (
+            <div>
+              <h2>Choose a Vault on the Left to see APY Data</h2>
+            </div>
+          )}
+          {apyData && (
+            <>
+              <h1>{selectedAsset ? `${selectedAsset} Chart` : 'Name not found'}</h1>
+              <div className="mt-8 w-full">
+                <ApyChart data={apyData.timeseries} />
               </div>
-            )}
-            {apyData && (
-              <>
-                <h1>{selectedAsset ? `${selectedAsset} Chart` : 'Name not found'}</h1>
-                <div className="mt-8">
-                  <ApyChart data={apyData.timeseries} />
-                </div>
-              </>
-            )}
-          </div>
-        </Suspense>
-      </div>
+            </>
+          )}
+        </div>
+      </Suspense>
     </div>
-  );
-};
-
+  </div>
+);
+}
 const AppWrapper: React.FC = () => (
   <Router>
     <Routes>
