@@ -6,6 +6,7 @@ import { LoadingSpinner, ErrorMessage } from './components/Loading';
 import { ChainId } from './constants/chains';
 const ApyChart = lazy(() => import('./components/ApyChart'));
 const Sidebar = lazy(() => import('./components/Sidebar'));
+import NavBar from './components/NavBar';
 
 interface Vault {
   address: string;
@@ -25,7 +26,7 @@ const App: React.FC = () => {
   const [getApyData, { data: apyData, loading: apyLoading, error: apyError }] = useLazyQuery(GET_APY_FOR_VAULT);
   const [selectedAsset, setSelectedAsset] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { address } = useParams<{ address: string }>(); 
+  const { chainId, address } = useParams<{ chainId: string, address: string }>(); // Updated to include chainId
 
   useEffect(() => {
     if (address && data) {
@@ -45,7 +46,7 @@ const App: React.FC = () => {
     }
   }, [address, data]); 
 
-  const handleVaultClick = (vault: { address: string, name: string, chainId: ChainId }) => {
+  const handleVaultClick = (vault: { address: string, name: string, chainId: ChainId, apiVersion: string }) => { // Updated to include apiVersion
     setSelectedAsset(vault.name);
     getApyData({
       variables: {
@@ -56,7 +57,8 @@ const App: React.FC = () => {
         limit: 1000,
       },
     });
-    navigate(`/${vault.address}`);
+    const versionPrefix = vault.apiVersion.startsWith('0') ? 'vaults' : vault.apiVersion.startsWith('3') ? 'v3' : ''; // Determine version prefix
+    navigate(`/${versionPrefix}/${vault.chainId}/${vault.address}`); // Updated to include version prefix
   };
 
   if (loading) return <LoadingSpinner />; 
@@ -80,27 +82,30 @@ const App: React.FC = () => {
   });
 
   return (
-    <div className="flex h-screen">
-      <Suspense fallback={<div>Loading...</div>}>
-        <Sidebar groupedVaults={groupedVaults} handleVaultClick={handleVaultClick} />
-        <div className="flex-1 p-5 flex flex-col items-center justify-center">
-          {apyLoading && <LoadingSpinner />}
-          {apyError && <ErrorMessage error={apyError} />}
-          {!apyData && (
-            <div>
-              <h2>Choose a Vault on the Left to see APY Data</h2>
-            </div>
-          )}
-          {apyData && (
-            <>
-              <h1>{selectedAsset ? `${selectedAsset} Chart` : 'Name not found'}</h1>
-              <div className="mt-8">
-                <ApyChart data={apyData.timeseries} />
+    <div className="flex flex-col h-screen w-screen pl-4 pr-4" >
+      <NavBar/>
+      <div className="flex flex-1">
+        <Suspense fallback={<div>Loading...</div>}>
+          <Sidebar groupedVaults={groupedVaults} handleVaultClick={handleVaultClick} />
+          <div className="flex-1 p-5 flex flex-col items-center justify-center">
+            {apyLoading && <LoadingSpinner />}
+            {apyError && <ErrorMessage error={apyError} />}
+            {!apyData && (
+              <div>
+                <h2>Choose a Vault on the Left to see APY Data</h2>
               </div>
-            </>
-          )}
-        </div>
-      </Suspense>
+            )}
+            {apyData && (
+              <>
+                <h1>{selectedAsset ? `${selectedAsset} Chart` : 'Name not found'}</h1>
+                <div className="mt-8">
+                  <ApyChart data={apyData.timeseries} />
+                </div>
+              </>
+            )}
+          </div>
+        </Suspense>
+      </div>
     </div>
   );
 };
@@ -109,7 +114,7 @@ const AppWrapper: React.FC = () => (
   <Router>
     <Routes>
       <Route path="/" element={<App />} />
-      <Route path="/:address" element={<App />} />
+      <Route path="/:versionPrefix/:chainId/:address" element={<App />} /> {/* Updated to include versionPrefix */}
     </Routes>
   </Router>
 );
