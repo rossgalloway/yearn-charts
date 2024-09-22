@@ -40,7 +40,7 @@ interface ToggleButtonProps {
 
 const ToggleButton: React.FC<ToggleButtonProps> = ({ isOpen, onClick, label, className }) => (
   <button
-    className={`p-2.5 w-full text-left cursor-pointer hover:bg-blue-700 flex justify-between ${className}`}
+className={`p-2.5 w-full text-left cursor-pointer font-med hover:bg-blue-700 hover:text-white flex justify-between ${className}` }
     onClick={onClick}
   >
     <span>{label}</span>
@@ -126,8 +126,8 @@ const Sidebar: React.FC<SidebarProps> = ({ groupedVaults, handleVaultClick }) =>
   }, {});
 
   return (
-    <div className="overflow-y-auto" style={{ width: '34rem', height: 'calc(100vh - 64px)' }}> {/* Adjusted height */}
-      <div className="sticky top-0 bg-darkBackground z-10 p-2.5"> {/* Added padding to sticky div */}
+    <div className="overflow-y-auto" style={{ height: 'calc(100vh - 64px)', paddingRight: '1rem' }}>
+      <div className="sticky top-0 z-10"> {/* Updated for light and dark mode */}
         <input
           type="text"
           placeholder="Search vaults..."
@@ -136,6 +136,7 @@ const Sidebar: React.FC<SidebarProps> = ({ groupedVaults, handleVaultClick }) =>
           className="w-full p-2.5 border border-gray-300 rounded"
         />
       </div>
+      <div className="h-4"></div>
       {Object.keys(filteredGroupedVaults).map(assetName => {
         const isAssetOpen = openGroups[assetName]?.isOpen || false;
         return (
@@ -144,7 +145,7 @@ const Sidebar: React.FC<SidebarProps> = ({ groupedVaults, handleVaultClick }) =>
               isOpen={isAssetOpen}
               onClick={() => toggleAssetGroup(assetName)}
               label={assetName}
-              className={`bg-darkBackground ${isAssetOpen ? 'bg-blue-700' : ''}`}
+              className={` ${isAssetOpen ? 'font-bold' : ''}`}
             />
             {isAssetOpen && (
               <div className="pl-4">
@@ -164,7 +165,7 @@ const Sidebar: React.FC<SidebarProps> = ({ groupedVaults, handleVaultClick }) =>
                         isOpen={isChainOpen}
                         onClick={() => toggleChainGroup(assetName, chainName)}
                         label={chainName}
-                        className="bg-darkBackground font-bold"
+                        className={` ${isChainOpen ? 'font-bold' : ''}`}
                       />
                       {isChainOpen && (
                         <div className="pl-4">
@@ -189,7 +190,7 @@ const Sidebar: React.FC<SidebarProps> = ({ groupedVaults, handleVaultClick }) =>
                                     isOpen={isVersionOpen}
                                     onClick={() => toggleVersionGroup(assetName, chainName, version)}
                                     label={version}
-                                    className="bg-darkBackground font-semibold"
+                                    className={` ${isVersionOpen ? 'font-bold' : ''}`}
                                   />
                                   {isVersionOpen && (
                                     <div className="pl-4">
@@ -202,13 +203,14 @@ const Sidebar: React.FC<SidebarProps> = ({ groupedVaults, handleVaultClick }) =>
                                         .map(vault => (
                                           <button
                                             key={vault.address}
-                                            className={`p-2.5 w-full text-left cursor-pointer hover:bg-blue-700 ${activeVault === vault.address ? 'bg-blue-700' : 'bg-darkBackground'
-                                              }`}
+                                            className={`p-2.5 w-full text-left cursor-pointer hover:bg-blue-700 hover:text-white focus:bg-blue-700 focus:text-white`}
                                             onClick={() => handleVaultClickWithActive(vault)}
                                           >
                                             <div>{vault.name}</div>
                                             <div>{`TVL: ${formatCurrency(vault.tvl.close)}`}</div>
-                                            <div>{vault.address}</div>
+                                            <div title={vault.address}>
+                                              {`${vault.address.slice(0, 8)}...${vault.address.slice(-8)}`}
+                                            </div>
                                           </button>
                                         ))}
                                     </div>
