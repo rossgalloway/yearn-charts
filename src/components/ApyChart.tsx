@@ -133,7 +133,7 @@ const ApyChart: React.FC<ApyChartProps> = ({ data }) => {
   );
 
   return (
-    <div className="h-[600px] flex flex-col justify-center items-center" style={{ width: `calc(100vw - 24rem)`}}> {/* Fixed calc syntax */}
+    <div className="w-full md:h-[calc(75vh)] h-[50vh] pr-4 pl-4 flex flex-col justify-center items-center "> {/* Fixed calc syntax */}
       <Line data={chartData} options={options} /> {/* Render the Line chart */}
       <div className="mt-4">
         {/* Button to set timeframe to 7 days */}

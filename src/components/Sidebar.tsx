@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { CHAIN_ID_TO_NAME, ChainId } from '../constants/chains';
 import { getApiVersion } from '../helpers/getApiVersion';
+import Hamburger from 'hamburger-react';
+import Logo from '/logo.svg';
 
 interface Vault {
   address: string;
@@ -14,6 +16,8 @@ interface Vault {
 interface SidebarProps {
   groupedVaults: { [key: string]: Vault[] };
   handleVaultClick: (vault: Vault) => void;
+  setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>; // Accept setIsSidebarOpen
+  isSidebarOpen: boolean; // Accept isSidebarOpen
 }
 
 interface OpenGroupsState {
@@ -40,7 +44,7 @@ interface ToggleButtonProps {
 
 const ToggleButton: React.FC<ToggleButtonProps> = ({ isOpen, onClick, label, className }) => (
   <button
-className={`p-2.5 w-full text-left cursor-pointer font-med hover:bg-blue-700 hover:text-white flex justify-between ${className}` }
+    className={`p-2.5 w-full text-left cursor-pointer font-med hover:bg-blue-700 hover:text-white flex justify-between ${className}`}
     onClick={onClick}
   >
     <span>{label}</span>
@@ -48,7 +52,12 @@ className={`p-2.5 w-full text-left cursor-pointer font-med hover:bg-blue-700 hov
   </button>
 );
 
-const Sidebar: React.FC<SidebarProps> = ({ groupedVaults, handleVaultClick }) => {
+const Sidebar: React.FC<SidebarProps> = ({
+  groupedVaults,
+  handleVaultClick,
+  setIsSidebarOpen,
+  isSidebarOpen,
+}) => {
   const [openGroups, setOpenGroups] = useState<OpenGroupsState>({});
   const [activeVault, setActiveVault] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -105,6 +114,7 @@ const Sidebar: React.FC<SidebarProps> = ({ groupedVaults, handleVaultClick }) =>
   const handleVaultClickWithActive = (vault: Vault) => {
     setActiveVault(vault.address);
     handleVaultClick(vault);
+    setIsSidebarOpen(false);
   };
 
   // Format currency
@@ -125,18 +135,33 @@ const Sidebar: React.FC<SidebarProps> = ({ groupedVaults, handleVaultClick }) =>
     return acc;
   }, {});
 
-  return (
-    <div className="overflow-y-auto" style={{ height: 'calc(100vh - 64px)', paddingRight: '1rem' }}>
-      <div className="sticky top-0 z-10"> {/* Updated for light and dark mode */}
-        <input
-          type="text"
-          placeholder="Search vaults..."
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-          className="w-full p-2.5 border border-gray-300 rounded"
-        />
+return (
+  <div className="md:pr-4 md:h-[calc(100vh-64px)] h-[100vh] pr-0 flex flex-col">
+    {/* Menu Header for Mobile */}
+    <div className="md:hidden flex items-center justify-between mb-4">
+      <div className="flex items-center">
+        <img src={Logo} className="w-8 h-8 mr-2" alt="Logo" />
+        <span className="text-xl font-bold">Yearn Charts</span>
       </div>
-      <div className="h-4"></div>
+      <Hamburger
+        toggled={isSidebarOpen}
+        toggle={() => setIsSidebarOpen(!isSidebarOpen)}
+        size={20}
+        direction="right"
+      />
+    </div>
+    {/* Search Bar */}
+    <div className="sticky top-0 z-10 bg-lightBackground dark:bg-gray-800"> {/* Added background color */}
+      <input
+        type="text"
+        placeholder="Search vaults..."
+        value={searchTerm}
+        onChange={e => setSearchTerm(e.target.value)}
+        className="w-full p-2.5 border border-gray-300 rounded"
+      />
+    </div>
+    <div className="h-4"></div>
+    <div className="overflow-y-auto flex-1"> {/* Added flex-1 */}
       {Object.keys(filteredGroupedVaults).map(assetName => {
         const isAssetOpen = openGroups[assetName]?.isOpen || false;
         return (
@@ -203,7 +228,9 @@ const Sidebar: React.FC<SidebarProps> = ({ groupedVaults, handleVaultClick }) =>
                                         .map(vault => (
                                           <button
                                             key={vault.address}
-                                            className={`p-2.5 w-full text-left cursor-pointer hover:bg-blue-700 hover:text-white focus:bg-blue-700 focus:text-white`}
+                                            className={`p-2.5 w-full text-left cursor-pointer hover:bg-blue-700 hover:text-white ${
+                                              activeVault === vault.address ? 'bg-blue-700 text-white' : ''
+                                            }`} 
                                             onClick={() => handleVaultClickWithActive(vault)}
                                           >
                                             <div>{vault.name}</div>
@@ -229,7 +256,7 @@ const Sidebar: React.FC<SidebarProps> = ({ groupedVaults, handleVaultClick }) =>
         );
       })}
     </div>
-  );
+  </div>
+);
 }
-
 export default Sidebar;
