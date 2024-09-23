@@ -27,6 +27,7 @@ const App: React.FC = () => {
   const [selectedAsset, setSelectedAsset] = useState<string | null>(null);
   const navigate = useNavigate();
   const { chainId, address } = useParams<{ chainId: string, address: string }>(); // Updated to include chainId
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (address && data) {
@@ -44,7 +45,7 @@ const App: React.FC = () => {
         });
       }
     }
-  }, [address, data]); 
+  }, [address, data]);
 
   const handleVaultClick = (vault: { address: string, name: string, chainId: ChainId, apiVersion: string }) => { // Updated to include apiVersion
     setSelectedAsset(vault.name);
@@ -61,8 +62,12 @@ const App: React.FC = () => {
     navigate(`/${versionPrefix}/${vault.chainId}/${vault.address}`); // Updated to include version prefix
   };
 
-  if (loading) return <LoadingSpinner />; 
-  if (error) return <ErrorMessage error={error} />; 
+  const handleMenuClick = () => {
+    setIsSidebarOpen((prev) => !prev);
+  };
+
+  if (loading) return <LoadingSpinner />;
+  if (error) return <ErrorMessage error={error} />;
 
   const filteredVaults = filterVaults(data.vaults)
     .filter(vault => vault.tvl.close > 100)
@@ -81,36 +86,46 @@ const App: React.FC = () => {
     groupedVaults[assetName].sort((a, b) => a.chainId - b.chainId);
   });
 
-return (
-  <div className="flex flex-col h-screen w-screen pl-4 pr-4">
-    <NavBar />
-    <div className="flex flex-1 flex-col md:flex-row">
-      <Suspense fallback={<div>Loading...</div>}>
-        <div className="w-full md:w-1/4" style={{ minWidth: '20rem', width: '20rem'}}>
-          <Sidebar groupedVaults={groupedVaults} handleVaultClick={handleVaultClick} />
-        </div>
-        <div className="flex-1 p-5 pt-0 flex flex-col items-center justify-center w-full">
-          {apyLoading && <LoadingSpinner />}
-          {apyError && <ErrorMessage error={apyError} />}
-          {!apyLoading && !apyError && !apyData && (
-            <div>
-              <h2>Choose a Vault on the Left to see APY Data</h2>
-            </div>
-          )}
-          {apyData && (
-            <>
-              <h1>{selectedAsset ? `${selectedAsset} Chart` : 'Name not found'}</h1>
-              <div className="mt-8 w-full">
-                <ApyChart data={apyData.timeseries} />
+  return (
+    <div className="flex flex-col h-screen w-screen">
+      <NavBar onMenuClick={handleMenuClick} isSidebarOpen={isSidebarOpen} />
+      <div className="flex flex-1 flex-col md:flex-row relative">
+        <Suspense fallback={<div>Loading...</div>}>
+          {/* Sidebar */}
+          <div
+            className={`fixed inset-y-0 right-0 z-30 w-full md:w-96 md:max-w-96 p-4 md:pl-2 md:pr-2 md:pt-0 md:pb-0 bg-lightBackground dark:bg-darkBackground md:bg-transparent transform ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'} transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:flex`} 
+            // style={{ width: '20rem', maxWidth: '20rem' }} // Fixed syntax errors
+          >
+            <Sidebar
+              groupedVaults={groupedVaults}
+              handleVaultClick={handleVaultClick}
+              setIsSidebarOpen={setIsSidebarOpen} // Pass setIsSidebarOpen
+              isSidebarOpen={isSidebarOpen} // Pass isSidebarOpen
+            />
+          </div>
+          <div className="flex-1 flex flex-col items-center w-full">
+            {apyLoading && <LoadingSpinner />}
+            {apyError && <ErrorMessage error={apyError} />}
+            {!apyLoading && !apyError && !apyData && (
+              <div>
+                <h2>Choose a Vault on the Left to see APY Data</h2>
               </div>
-            </>
-          )}
-        </div>
-      </Suspense>
+            )}
+            {apyData && (
+              <>
+                <h1 className="text-xl md:text-5xl">{selectedAsset ? `${selectedAsset} Chart` : 'Name not found'}</h1>
+                <div className="mt-8 w-full">
+                  <ApyChart data={apyData.timeseries} />
+                </div>
+              </>
+            )}
+          </div>
+        </Suspense>
+      </div>
     </div>
-  </div>
-);
+  );
 }
+
 const AppWrapper: React.FC = () => (
   <Router>
     <Routes>
