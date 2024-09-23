@@ -228,7 +228,9 @@ return (
                                         .map(vault => (
                                           <button
                                             key={vault.address}
-                                            className={`p-2.5 w-full text-left cursor-pointer hover:bg-blue-700 hover:text-white focus:bg-blue-700 focus:text-white`}
+                                            className={`p-2.5 w-full text-left cursor-pointer hover:bg-blue-700 hover:text-white ${
+                                              activeVault === vault.address ? 'bg-blue-700 text-white' : ''
+                                            }`} 
                                             onClick={() => handleVaultClickWithActive(vault)}
                                           >
                                             <div>{vault.name}</div>
