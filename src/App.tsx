@@ -6,7 +6,6 @@ import { useQuery, useLazyQuery } from '@apollo/client';
 import { LoadingSpinner, ErrorMessage } from './components/Loading';
 import { ChainId } from './constants/chains';
 const ApyChart = lazy(() => import('./components/ApyChart'));
-const ApyChart2 = lazy(() => import('./components/ApyChart2'));
 const Sidebar = lazy(() => import('./components/Sidebar'));
 import NavBar from './components/NavBar';
 
@@ -114,7 +113,7 @@ const App: React.FC = () => {
               </div>
             )}
             {apyData && (
-              <ApyChart2 data={apyData.timeseries} selectedAsset={selectedAsset} />
+              <ApyChart data={apyData.timeseries} selectedAsset={selectedAsset} />
             )}
           </div>
         </Suspense>
