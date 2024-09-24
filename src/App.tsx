@@ -72,7 +72,7 @@ const App: React.FC = () => {
   if (error) return <ErrorMessage error={error} />;
 
   const filteredVaults = filterVaults(data.vaults)
-    .filter(vault => vault.tvl.close > 100)
+    .filter(vault => vault.tvl && vault.tvl.close > 100) // Filter out vaults with null tvl and tvl.close <= 100
     .sort((a, b) => b.tvl.close - a.tvl.close);
 
   const groupedVaults: GroupedVaults = filteredVaults.reduce((acc: GroupedVaults, vault) => {
@@ -95,7 +95,7 @@ const App: React.FC = () => {
         <Suspense fallback={<div>Loading...</div>}>
           {/* Sidebar */}
           <div
-            className={`fixed inset-y-0 right-0 z-30 w-full md:w-96 md:max-w-96 md:min-w-96 p-4 md:pl-2 md:pr-2 md:pt-0 md:pb-0 bg-lightBackground dark:bg-darkBackground md:bg-transparent transform ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'} transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:flex`}
+            className={`fixed inset-y-0 right-0 z-30 w-full lg:w-96 lg:max-w-96 lg:min-w-96 p-4 lg:pl-2 lg:pr-2 lg:pt-0 lg:pb-0 bg-lightBackground dark:bg-darkBackground lg:bg-transparent transform ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'} transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 lg:flex`}
           // style={{ width: '20rem', maxWidth: '20rem' }} // Fixed syntax errors
           >
             <Sidebar
@@ -105,7 +105,7 @@ const App: React.FC = () => {
               isSidebarOpen={isSidebarOpen} // Pass isSidebarOpen
             />
           </div>
-          <div className="flex-1 flex flex-col items-center w-full xl:mr-12 2xl:mr-24">
+          <div className="flex-1 flex flex-col items-center w-full lg:mr-[3rem] xl:mr-[6rem]">
             {apyLoading && <LoadingSpinner />}
             {apyError && <ErrorMessage error={apyError} />}
             {!apyLoading && !apyError && !apyData && (

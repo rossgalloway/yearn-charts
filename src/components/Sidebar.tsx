@@ -139,7 +139,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 return (
   <div className="md:pr-4 md:h-[calc(100vh-64px)] h-[100vh] pr-0 flex flex-col">
     {/* Menu Header for Mobile */}
-    <div className="md:hidden flex items-center justify-between mb-4">
+    <div className="lg:hidden flex items-center justify-between mb-4">
       <div className="flex items-center">
         <img src={Logo} className="w-8 h-8 mr-2" alt="Logo" />
         <span className="text-xl font-bold">Yearn Charts</span>

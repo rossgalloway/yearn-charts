@@ -6,7 +6,6 @@ import {
     CartesianGrid,
     XAxis,
     YAxis,
-    Tooltip as RechartsTooltip,
     Legend,
     ResponsiveContainer,
 } from 'recharts';
@@ -36,7 +35,8 @@ const calculateSMA = (data: number[], windowSize: number): (number | null)[] => 
             sma.push(null); // Not enough data to calculate SMA
         } else {
             const windowData = data.slice(i - windowSize + 1, i + 1); // Data within the window
-            const average = windowData.reduce((sum, value) => sum + value, 0) / windowSize; // Calculate average
+            const average =
+                windowData.reduce((sum, value) => sum + value, 0) / windowSize; // Calculate average
             sma.push(average); // Push the average to the SMA array
         }
     }
@@ -59,20 +59,18 @@ const ApyChart: React.FC<ApyChartProps> = ({ data, selectedAsset }) => {
 
     // Memoize the filtered data based on the timeframe
     const filteredData = useMemo(() => {
-        return data
-            .slice(-timeframeInDays)
-            .map(entry => ({
-                ...entry,
-                time: new Date(entry.time * 1000).toLocaleDateString(),
-                value: entry.value * 100,
-            }));
+        return data.slice(-timeframeInDays).map((entry) => ({
+            ...entry,
+            time: new Date(entry.time * 1000).toLocaleDateString(),
+            value: entry.value * 100,
+        }));
     }, [data, timeframeInDays]);
 
     // Memoize the values extracted from filtered data
-    const values = useMemo(() => filteredData.map(entry => entry.value), [filteredData]);
+    const values = useMemo(() => filteredData.map((entry) => entry.value), [filteredData]);
 
     // Memoize all values for SMA calculation
-    const allValues = useMemo(() => data.map(entry => entry.value * 100), [data]);
+    const allValues = useMemo(() => data.map((entry) => entry.value * 100), [data]);
 
     // Memoize the SMA values
     const smaValues = useMemo(() => {
@@ -107,20 +105,57 @@ const ApyChart: React.FC<ApyChartProps> = ({ data, selectedAsset }) => {
             color: 'hsl(var(--chart-3))',
         },
     } satisfies ChartConfig;
-
     return (
-        <div className="w-full pr-4 pl-4 flex flex-col justify-center items-center" >
-            <h1 className="text-xl md:text-5xl">{selectedAsset ? `${selectedAsset} Chart` : 'Name not found'}</h1>
-            <div className="w-full" >
-                <ChartContainer config={chartConfig}>
-                    <ResponsiveContainer width="100%" height="100%">
-                        <LineChart
-                            data={chartDataArray}
-                            margin={{
-                                // left: 12,
-                                right: 12,
-                            }}
-                        >
+        <>
+            <div className="flex flex-col xl:flex-row w-full pl-0 md:pl-[2rem] justify-between items-center xl:items-end">
+                <h1 className="text-xl sm:text-3xl flex-grow">
+                    {selectedAsset ? `${selectedAsset} Chart` : 'Name not found'}
+                </h1>
+                <div className="flex gap-2 mt-4 xl:mt-0">
+                    {/* Timeframe buttons */}
+                    <button
+                        onClick={() => setTimeframe(7)}
+                        className={`p-2 rounded ${timeframe === 7
+                                ? 'bg-blue-500 text-white'
+                                : 'border border-blue-500 text-blue-500 bg-lightBackground dark:bg-darkBackground hover:bg-blue-500 hover:text-white'
+                            }`}
+                    >
+                        7 Days
+                    </button>
+                    <button
+                        onClick={() => setTimeframe(30)}
+                        className={`p-2 rounded ${timeframe === 30
+                                ? 'bg-blue-500 text-white'
+                                : 'border border-blue-500 text-blue-500 bg-lightBackground dark:bg-darkBackground hover:bg-blue-500 hover:text-white'
+                            }`}
+                    >
+                        30 Days
+                    </button>
+                    <button
+                        onClick={() => setTimeframe(180)}
+                        className={`p-2 rounded ${timeframe === 180
+                                ? 'bg-blue-500 text-white'
+                                : 'border border-blue-500 text-blue-500 bg-lightBackground dark:bg-darkBackground hover:bg-blue-500 hover:text-white'
+                            }`}
+                    >
+                        180 Days
+                    </button>
+                    <button
+                        onClick={() => setTimeframe('max')}
+                        className={`p-2 rounded ${timeframe === 'max'
+                                ? 'bg-blue-500 text-white'
+                                : 'border border-blue-500 text-blue-500 bg-lightBackground dark:bg-darkBackground hover:bg-blue-500 hover:text-white'
+                            }`}
+                    >
+                        Max
+                    </button>
+                </div>
+            </div>
+            <div className="w-full mt-4 pr-[2rem] lg:pr-0">
+                {/* <div className="h-[300px] md:h-[500px] lg:h-[600px]"> */}
+                    <ChartContainer config={chartConfig}>
+                        {/* Remove ResponsiveContainer here */}
+                        <LineChart data={chartDataArray} >
                             <CartesianGrid vertical={false} />
                             <XAxis
                                 dataKey="time"
@@ -161,49 +196,11 @@ const ApyChart: React.FC<ApyChartProps> = ({ data, selectedAsset }) => {
                                 dot={false}
                             />
                         </LineChart>
-                    </ResponsiveContainer>
-                </ChartContainer>
-            </div>
-            <div className="mt-4">
-                {/* Timeframe buttons */}
-                <button
-                    onClick={() => setTimeframe(7)}
-                    className={`mr-2 p-2 rounded ${timeframe === 7
-                            ? 'bg-blue-500 text-white'
-                            : 'border border-blue-500 text-blue-500 bg-lightBackground dark:bg-darkBackground hover:bg-blue-500 hover:text-white'
-                        }`}
-                >
-                    7 Days
-                </button>
-                <button
-                    onClick={() => setTimeframe(30)}
-                    className={`mr-2 p-2 rounded ${timeframe === 30
-                            ? 'bg-blue-500 text-white'
-                            : 'border border-blue-500 text-blue-500 bg-lightBackground dark:bg-darkBackground hover:bg-blue-500 hover:text-white'
-                        }`}
-                >
-                    30 Days
-                </button>
-                <button
-                    onClick={() => setTimeframe(180)}
-                    className={`mr-2 p-2 rounded ${timeframe === 180
-                            ? 'bg-blue-500 text-white'
-                            : 'border border-blue-500 text-blue-500 bg-lightBackground dark:bg-darkBackground hover:bg-blue-500 hover:text-white'
-                        }`}
-                >
-                    180 Days
-                </button>
-                <button
-                    onClick={() => setTimeframe('max')}
-                    className={`p-2 rounded ${timeframe === 'max'
-                            ? 'bg-blue-500 text-white'
-                            : 'border border-blue-500 text-blue-500 bg-lightBackground dark:bg-darkBackground hover:bg-blue-500 hover:text-white'
-                        }`}
-                >
-                    Max
-                </button>
-            </div>
-        </div>
+                        {/* </ResponsiveContainer> */}
+                    </ChartContainer>
+                </div>
+            {/* </div> */}
+        </>
     );
 };
 

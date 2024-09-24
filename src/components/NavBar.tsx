@@ -7,22 +7,22 @@ import BookIcon from '/book-icon2.svg';
 import Hamburger from 'hamburger-react';
 
 interface NavBarProps {
-  onMenuClick: () => void; // Function to handle menu clicks
-  isSidebarOpen: boolean;  // State to control the hamburger toggled state
+  onMenuClick: () => void; 
+  isSidebarOpen: boolean;  
 }
 
 const NavBar: React.FC<NavBarProps> = ({ onMenuClick, isSidebarOpen }) => {
   const currentPath = window.location.pathname;
 
   return (
-    <nav className="w-full flex items-center justify-between p-4 md:pr-8">
+    <nav className="w-full flex items-center justify-between p-4 md:pr-[3rem] xl:pr-[6rem]">
       <div className="flex items-center">
         <img src={Logo} className="w-8 h-8 mr-2" alt="Logo" />
         <span className="text-xl font-bold">Yearn Charts</span>
       </div>
       <div className="flex items-center space-x-4">
         {/* Hamburger Menu Icon - Visible on small screens */}
-        <div className="block md:hidden">
+        <div className="block lg:hidden">
           <Hamburger
             toggled={isSidebarOpen}
             toggle={onMenuClick}
@@ -31,7 +31,7 @@ const NavBar: React.FC<NavBarProps> = ({ onMenuClick, isSidebarOpen }) => {
           />
         </div>
         {/* Existing Icons - Hidden on small screens */}
-        <div className="hidden md:flex items-center space-x-4">
+        <div className="hidden lg:flex items-center space-x-4">
           <a
             href="https://github.com/rossgalloway/yearn-charts"
             target="_blank"
