@@ -109,7 +109,7 @@ const App: React.FC = () => {
             {apyLoading && <LoadingSpinner />}
             {apyError && <ErrorMessage error={apyError} />}
             {!apyLoading && !apyError && !apyData && (
-              <div>
+              <div className="flex flex-1 items-center justify-center">
                 <h2>Choose a Vault on the Left to see APY Data</h2>
               </div>
             )}

@@ -107,8 +107,8 @@ const ApyChart: React.FC<ApyChartProps> = ({ data, selectedAsset }) => {
     } satisfies ChartConfig;
     return (
         <>
-            <div className="flex flex-col xl:flex-row w-full pl-0 md:pl-[2rem] justify-between items-center xl:items-end">
-                <h1 className="text-xl sm:text-3xl flex-grow">
+            <div className="flex flex-col xl:flex-row w-full md:pl-[2rem] justify-between items-center xl:items-end">
+                <h1 className="text-xl pl-[2rem] pr-[2rem] xl:pl-0 xl:pr-0 sm:text-3xl flex-grow">
                     {selectedAsset ? `${selectedAsset} Chart` : 'Name not found'}
                 </h1>
                 <div className="flex gap-2 mt-4 xl:mt-0">
@@ -156,7 +156,7 @@ const ApyChart: React.FC<ApyChartProps> = ({ data, selectedAsset }) => {
                     <ChartContainer config={chartConfig}>
                         {/* Remove ResponsiveContainer here */}
                         <LineChart data={chartDataArray} >
-                            <CartesianGrid vertical={false} />
+                            <CartesianGrid vertical={true} strokeWidth= '1px' />
                             <XAxis
                                 dataKey="time"
                                 tickLine={false}
