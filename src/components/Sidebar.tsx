@@ -1,3 +1,4 @@
+// src/components/Sidebar.tsx
 import React, { useState } from 'react';
 import { CHAIN_ID_TO_NAME, ChainId } from '../constants/chains';
 import { getApiVersion } from '../helpers/getApiVersion';

@@ -1,3 +1,4 @@
+// src/App.tsx
 import React, { useState, useEffect, lazy, Suspense } from 'react'; // Updated import to include useEffect
 import { BrowserRouter as Router, Route, Routes, useNavigate, useParams } from 'react-router-dom';
 import { GET_VAULTS, GET_APY_FOR_VAULT, filterVaults } from './graphql/queries';
@@ -5,6 +6,7 @@ import { useQuery, useLazyQuery } from '@apollo/client';
 import { LoadingSpinner, ErrorMessage } from './components/Loading';
 import { ChainId } from './constants/chains';
 const ApyChart = lazy(() => import('./components/ApyChart'));
+const ApyChart2 = lazy(() => import('./components/ApyChart2'));
 const Sidebar = lazy(() => import('./components/Sidebar'));
 import NavBar from './components/NavBar';
 
@@ -93,8 +95,8 @@ const App: React.FC = () => {
         <Suspense fallback={<div>Loading...</div>}>
           {/* Sidebar */}
           <div
-            className={`fixed inset-y-0 right-0 z-30 w-full md:w-96 md:max-w-96 p-4 md:pl-2 md:pr-2 md:pt-0 md:pb-0 bg-lightBackground dark:bg-darkBackground md:bg-transparent transform ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'} transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:flex`} 
-            // style={{ width: '20rem', maxWidth: '20rem' }} // Fixed syntax errors
+            className={`fixed inset-y-0 right-0 z-30 w-full md:w-96 md:max-w-96 md:min-w-96 p-4 md:pl-2 md:pr-2 md:pt-0 md:pb-0 bg-lightBackground dark:bg-darkBackground md:bg-transparent transform ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'} transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:flex`}
+          // style={{ width: '20rem', maxWidth: '20rem' }} // Fixed syntax errors
           >
             <Sidebar
               groupedVaults={groupedVaults}
@@ -103,7 +105,7 @@ const App: React.FC = () => {
               isSidebarOpen={isSidebarOpen} // Pass isSidebarOpen
             />
           </div>
-          <div className="flex-1 flex flex-col items-center w-full">
+          <div className="flex-1 flex flex-col items-center w-full xl:mr-12 2xl:mr-24">
             {apyLoading && <LoadingSpinner />}
             {apyError && <ErrorMessage error={apyError} />}
             {!apyLoading && !apyError && !apyData && (
@@ -112,12 +114,7 @@ const App: React.FC = () => {
               </div>
             )}
             {apyData && (
-              <>
-                <h1 className="text-xl md:text-5xl">{selectedAsset ? `${selectedAsset} Chart` : 'Name not found'}</h1>
-                <div className="mt-8 w-full">
-                  <ApyChart data={apyData.timeseries} />
-                </div>
-              </>
+              <ApyChart2 data={apyData.timeseries} selectedAsset={selectedAsset} />
             )}
           </div>
         </Suspense>
