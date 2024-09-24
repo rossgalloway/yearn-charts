@@ -120,7 +120,7 @@ const ApyChart: React.FC<ApyChartProps> = ({ data }) => {
           pointRadius: 0,
         },
         {
-          label: 'Average APR (%)',
+          label: 'Average APY (%)',
           backgroundColor: 'rgba(255,159,64,0.4)',
           borderColor: 'rgba(255,159,64,1)',
           pointRadius: 0,
