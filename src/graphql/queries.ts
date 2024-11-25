@@ -44,8 +44,7 @@ export const GET_VAULTS = gql`
     }
   }
 `;
-
-export const filterVaults = (vaults: Vault[]) => vaults.filter(vault => vault.yearn && vault.v3);
+export const filterVaults = (vaults: Vault[]) => vaults.filter(vault => vault.yearn);
 
 export const GET_APY_FOR_VAULT = gql`
 query ApyQuery($label: String!, $chainId: Int, $address: String, $limit: Int, $component: String) {
